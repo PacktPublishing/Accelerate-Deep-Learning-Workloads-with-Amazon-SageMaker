@@ -57,7 +57,7 @@ def transform_fn(inference_pipeline, data, content_type, accept_type):
     if "json" in content_type:
         deser_data = json.loads(data)
     else:
-        raise NotImplemented("Only 'application/json' content type is supported.")
+        raise NotImplemented("Only 'application/json' content type is implemented.")
     
     # Run inference
     predictions = inference_pipeline(deser_data)
@@ -66,4 +66,4 @@ def transform_fn(inference_pipeline, data, content_type, accept_type):
     if "json" in accept_type:
         return json.dumps(predictions)
     else:
-        raise NotImplemented("Only 'application/json' accept type is supported.")
+        raise NotImplemented("Only 'application/json' accept type is implemented.")
