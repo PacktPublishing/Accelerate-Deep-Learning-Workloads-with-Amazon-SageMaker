@@ -1,0 +1,9 @@
+FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.9.0-gpu-py38-cu111-ubuntu20.04
+
+RUN pip3 install git+https://github.com/huggingface/transformers
+
+ENV SAGEMAKER_SUBMIT_DIRECTORY /opt/ml/code
+ENV SAGEMAKER_PROGRAM train.py
+
+COPY 1_sources/train.py  $SAGEMAKER_SUBMIT_DIRECTORY/$SAGEMAKER_PROGRAM
+
