@@ -1,0 +1,39 @@
+FROM tensorflow/tensorflow:latest-devel-gpu
+RUN which pip
+
+# cython, falcon, gunicorn, grpc
+RUN pip3 install -U --no-cache-dir \
+    "awscli<2" \
+    boto3 \
+    cython==0.29.21 \
+    falcon==2.0.0 \
+    gunicorn==20.0.4 \
+    gevent==21.1.1 \
+    requests==2.25.1 \
+    grpcio==1.34.1 \
+    protobuf==3.14.0
+# using --no-dependencies to avoid installing tensorflow binary
+# && ${PIP} install --no-dependencies --no-cache-dir \
+#    tensorflow-serving-api-gpu==2.6
+    
+RUN pip3 install multi-model-server sagemaker-inference
+
+#RUN python3 --version
+#RUN pip3 --version
+
+
+# Copy entrypoint script to the image
+COPY 3_sources/src/dockerd_entrypoint.py /usr/local/bin/dockerd-entrypoint.py
+RUN chmod +x /usr/local/bin/dockerd-entrypoint.py
+
+RUN mkdir -p /home/model-server/
+
+# Copy the default custom service file to handle incoming data and inference requests
+COPY 3_sources/src/model_handler.py /opt/ml/model/model_handler.py
+COPY 3_sources/src/keras_model_loader.py /opt/ml/model/keras_model_loader.py
+
+# Define an entrypoint script for the docker image
+ENTRYPOINT ["python", "/usr/local/bin/dockerd-entrypoint.py"]
+
+# Define command to be passed to the entrypoint
+CMD ["serve"]
