@@ -1,8 +1,35 @@
-FROM tensorflow/tensorflow:latest-devel-gpu
-RUN which pip
+# Picking latest TF container
+FROM tensorflow/tensorflow:latest
 
-# cython, falcon, gunicorn, grpc
-RUN pip3 install -U --no-cache-dir \
+# Set a docker label to not advertise multi-model support on the container
+LABEL com.amazonaws.sagemaker.capabilities.multi-models=false
+# Set a docker label to enable container to use SAGEMAKER_BIND_TO_PORT environment variable if present
+LABEL com.amazonaws.sagemaker.capabilities.accept-bind-to-port=true
+
+
+# Installing Java and other common dependencies
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    fakeroot \
+    ca-certificates \
+    dpkg-dev \
+    g++ \
+    python3-dev \
+    openjdk-8-jdk-headless \
+    curl \
+    vim \
+    python3-opencv \
+    && rm -rf /var/lib/apt/lists/* \
+    && cd /tmp \
+    && curl -O https://bootstrap.pypa.io/get-pip.py \
+    && python3 get-pip.py
+
+# Installing AWS MMS and its dependencies
+RUN pip3 --no-cache-dir install mxnet \
+    multi-model-server \
+    sagemaker-inference \
+    retrying \
+    opencv-python \
     "awscli<2" \
     boto3 \
     cython==0.29.21 \
@@ -11,16 +38,18 @@ RUN pip3 install -U --no-cache-dir \
     gevent==21.1.1 \
     requests==2.25.1 \
     grpcio==1.34.1 \
-    protobuf==3.14.0
-# using --no-dependencies to avoid installing tensorflow binary
-# && ${PIP} install --no-dependencies --no-cache-dir \
-#    tensorflow-serving-api-gpu==2.6
-    
-RUN pip3 install multi-model-server sagemaker-inference
+    protobuf==3.14.0    
 
-#RUN python3 --version
-#RUN pip3 --version
+RUN useradd -m model-server \
+    && mkdir -p /home/model-server/tmp
 
+ENV PYTHONUNBUFFERED TRUE
+ENV PATH="$PATH:/sagemaker"
+ENV LD_LIBRARY_PATH='/usr/local/lib:$LD_LIBRARY_PATH'
+ENV MODEL_BASE_PATH=/models
+# The only required piece is the model name in order to differentiate endpoints
+ENV MODEL_NAME=model
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Copy entrypoint script to the image
 COPY 3_sources/src/dockerd_entrypoint.py /usr/local/bin/dockerd-entrypoint.py
@@ -33,7 +62,7 @@ COPY 3_sources/src/model_handler.py /opt/ml/model/model_handler.py
 COPY 3_sources/src/keras_model_loader.py /opt/ml/model/keras_model_loader.py
 
 # Define an entrypoint script for the docker image
-ENTRYPOINT ["python", "/usr/local/bin/dockerd-entrypoint.py"]
+ENTRYPOINT ["python3", "/usr/local/bin/dockerd-entrypoint.py"]
 
-# Define command to be passed to the entrypoint
+# Define default parameters to be passed to the entrypoint executable
 CMD ["serve"]
