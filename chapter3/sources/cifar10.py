@@ -80,19 +80,13 @@ def train(args):
 
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
-            # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
-
-            # zero the parameter gradients
             optimizer.zero_grad()
-
-            # forward + backward + optimize
             outputs = net(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
-            # print statistics
             running_loss += loss.item()
             if i % 2000 == 1999:  # print every 2000 mini-batches
                 print("[%d, %5d] loss: %.3f" % (epoch + 1, i + 1, running_loss / 2000))
@@ -128,16 +122,11 @@ def _load_from_bytearray(request_body):
 
 def transform_fn(model, request_body, content_type, accept_type):
 
-    logger.info("Inside transform function")
-    logger.info(f"Is model loaded? {type(model)}")
-    logger.info(f"content_type={content_type}")
-    logger.info(f"accept_type={accept_type}")
-    logger.info(f"type of request_body={type(request_body)}")
+    logger.info("Running inference inside container")
 
-    logger.info("Trying to deserialize request")
     try:
         np_image = _load_from_bytearray(request_body)
-        logger.info("Deser completed")
+        logger.info("Deserialization completed")
     except Exception as e:
         logger.exception(e)
 
@@ -156,6 +145,7 @@ if __name__ == "__main__":
 
     # SageMaker passes hyperparameters  as command-line arguments to the script
     # Parsing them below...
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--batch-size", type=int, default=4)
