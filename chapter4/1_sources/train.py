@@ -53,7 +53,6 @@ def main():
     parser.add_argument(
         "--training-dir", type=str, default=os.environ["SM_CHANNEL_TRAINING"]
     )
-    # parser.add_argument("--warmup-steps", type=int, default=100)
     parser.add_argument("--logging-steps", type=float, default=100)
     parser.add_argument("--weight-decay", type=float, default=0.01)
     parser.add_argument("--seed", type=int, default=42)
@@ -103,24 +102,11 @@ def main():
         args.model_name, config=config
     )
 
-    # compute metrics function for binary classification
-    # def compute_metrics(pred):
-    #     labels = pred.label_ids
-    #     preds = pred.predictions.argmax(-1)
-    #     precision, recall, f1, _ = precision_recall_fscore_support(
-    #         labels, preds, average="binary"
-    #     )
-    #     acc = accuracy_score(labels, preds)
-    #     return {"accuracy": acc, "f1": f1, "precision": precision, "recall": recall}
-
     # define training args
     training_args = TrainingArguments(
         output_dir=args.model_dir,
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.train_batch_size,
-        # per_device_eval_batch_size=args.eval_batch_size,
-        # warmup_steps=args.warmup_steps,
-        # evaluation_strategy="epoch",
         logging_dir=f"{args.output_data_dir}/logs",
         learning_rate=float(args.learning_rate),
         prediction_loss_only=True,
