@@ -1,3 +1,4 @@
 .vscode*
 *.ipynb_checkpoints
 *.pkl
+.DS_Store
