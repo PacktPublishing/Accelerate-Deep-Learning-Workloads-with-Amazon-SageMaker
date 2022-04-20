@@ -40,8 +40,6 @@ def _build_tf_config():
 
     os.environ["TF_CONFIG"] = json.dumps(tf_config)
 
-    return
-
 
 def _set_nccl_environment():
     """Set NCCL environment variables for the container.
@@ -85,14 +83,11 @@ def main(args):
 
     strategy = tf.distribute.MultiWorkerMirroredStrategy(
         communication_options=tf.distribute.experimental.CommunicationOptions(
-            implementation=tf.distribute.experimental.CollectiveCommunication.AUTO  # checking if AUTO helps, otherwise, go back to NCCL
+            implementation=tf.distribute.experimental.CollectiveCommunication.AUTO
         )
     )
 
     print(f"How many replicas in sync? {strategy.num_replicas_in_sync}")
-    print(f"Cluster spec: {strategy.cluster_resolver.cluster_spec()}")
-    print(f"Environment: {strategy.cluster_resolver.environment}")
-    print(f"Task id: {strategy.cluster_resolver.task_id}")
 
     with strategy.scope():
         multi_worker_model = build_and_compile_cnn_model()

@@ -12,16 +12,6 @@ import horovod.keras as hvd
 from keras import backend as K
 
 
-@retry(
-    stop_max_delay=1000 * 60 * 15,
-    wait_exponential_multiplier=100,
-    wait_exponential_max=30000,
-)
-def _dns_lookup(host):
-    """Retry DNS lookup on host."""
-    return socket.gethostbyname(host)
-
-
 def _initiate_hvd():
     # Horovod: initialize Horovod.
     hvd.init()
@@ -33,34 +23,8 @@ def _initiate_hvd():
     if gpus:
         tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], "GPU")
 
-    return
-
-
-def _set_nccl_environment():
-    """Set NCCL environment variables for the container.
-    https://docs.nvidia.com/deeplearning/sdk/nccl-developer-guide/index.html#ncclknobs
-    Args:
-        network_interface_name: The name of the network interface to use for
-            distributed training.
-    """
-    # Set the network interface for inter node communication
-    os.environ["NCCL_SOCKET_IFNAME"] = os.environ["SM_NETWORK_INTERFACE_NAME"]
-    # Disable IB transport and force to use IP sockets by default
-    os.environ["NCCL_IB_DISABLE"] = "1"
-    # Set to INFO for more NCCL debugging information
-    os.environ["NCCL_DEBUG"] = "INFO"
-
-    # To check env var passed to each rank
-    os.environ["NCCL_DEBUG_SUBSYS"] = "ENV"
-
-    # Just checking if this helps https://github.com/tensorflow/tensorflow/issues/34638
-    os.environ["NCCL_LL_THRESHOLD"] = "0"
-
-    return
-
 
 def _get_world_size():
-    # assuming we are working on GPU devices only
     num_workers = len(os.getenv("SM_HOSTS"))
     num_gpu_devices = int(os.getenv("SM_NUM_GPUS", 0))
     return num_workers * num_gpu_devices
@@ -68,14 +32,7 @@ def _get_world_size():
 
 def main(args):
 
-    # for host in json.loads(os.getenv("SM_HOSTS")):
-    #    _dns_lookup(host)
-    #    print(f"DNS lookup complete for {host}")
-
-    # _set_nccl_environment()
     _initiate_hvd()
-    print(os.environ)
-
     hvd_model = build_and_compile_cnn_model()
 
     global_batch_size = args.batch_size_per_device * _get_world_size()
@@ -110,7 +67,7 @@ def main(args):
         callbacks=callbacks,
     )
 
-    # 2. Save model
+    # Save model only in one rank to avoid conflicts
     if hvd.rank() == 0:
         hvd_model.save(os.getenv("SM_MODEL_DIR"), save_format="tf")
 
