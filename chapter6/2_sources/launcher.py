@@ -18,18 +18,13 @@ import json
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
-# port for distributed processes to communicate
+# port for distributed DDP processes to communicate
 RDZV_PORT = "7777"
 
 
 def parse_args():
-    """
-    TODO: likely to delete in future
-    """
     parser = ArgumentParser(
-        description="PyTorch DDP training launch "
-        "helper utility that will spawn up "
-        "multiple distributed processes"
+        description="Custom arg parser. Using it to get reference to train script."
     )
     parser.add_argument(
         "--train-script",
@@ -41,17 +36,15 @@ def parse_args():
 
 
 def main():
-    distr_args, training_args = parse_args()
-
-    LOGGER.info(f"Arguments: {distr_args}")
+    distr_args, training_hyperparameters = parse_args()
 
     # world size in terms of number of processes across all workers
-    nodes = json.loads(os.getenv("SM_HOSTS", "[]"))
+    nodes = json.loads(os.getenv("SM_HOSTS"))
     nnodes = len(nodes)
     node_rank = nodes.index(os.getenv("SM_CURRENT_HOST"))
     nproc_per_node = os.getenv("SM_NUM_GPUS", 1)
 
-    # Construction CMD to start torch distributed launcher
+    # Construct command line to to launch training processes using torch.distributed.run
     cmd = [
         sys.executable,
         "-m",
@@ -65,13 +58,12 @@ def main():
         distr_args.train_script,
     ]
 
-    # Passing other CMD arguments to training script directly.
-    cmd.extend(training_args)
+    # Adding training hyperparameters which will be then passed in training script
+    cmd.extend(training_hyperparameters)
 
-    LOGGER.info(f"Training CMD to be executed on each node once:{cmd}")
+    LOGGER.info(f"Command line to be executed on each node once:{cmd}")
 
-    # Spawning DDP launcher process which will in it's turn create multiple child processes
-    #
+    # Spawning DDP launcher process which will then spawn multiple child processes (one process per GPU)
     process = subprocess.Popen(cmd, env=os.environ)
     process.wait()
     if process.returncode != 0:
