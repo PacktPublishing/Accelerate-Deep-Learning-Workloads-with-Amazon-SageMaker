@@ -223,6 +223,8 @@ def main():
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
 
+    args.batch_size //= dist.get_world_size()
+    args.batch_size = max(args.batch_size, 1)
     train_loader, test_loader = get_dataloaders(args)
 
     for epoch in range(1, args.epochs + 1):
