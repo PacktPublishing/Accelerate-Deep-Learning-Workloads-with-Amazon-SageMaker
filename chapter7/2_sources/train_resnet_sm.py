@@ -11,7 +11,10 @@ from torchvision import datasets, models, transforms
 import time
 from torch.optim import lr_scheduler
 from smdebug import modes
-from smdebug.pytorch import get_hook
+
+# from smdebug.pytorch import get_hook
+import smdebug.pytorch as smd
+
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -149,8 +152,6 @@ def get_dataloaders(args):
 
 def main():
 
-    device = torch.cuda.set_device("cuda:0")
-
     args, unknown_args = parse_args()
     LOGGER.info(
         f"Collected hyperparameters: {args}."
@@ -160,9 +161,27 @@ def main():
     if not torch.cuda.is_available():
         raise ValueError("The script requires CUDA support, but CUDA not available")
 
+    print(f"Device count: {torch.cuda.device_count()}")
     model = initialize_resnet_model(
         NUM_CLASSES, feature_extract=False, use_pretrained=True
     )
+
+    # torch.cuda.set_device(0)
+    device = torch.device("cuda")
+    model.to(device)
+
+    # TODO: remove it
+    print(os.environ)
+
+    on_cuda = next(model.parameters()).is_cuda
+    if not on_cuda:
+        print(f"Model is not on cuda. On_cuda is {on_cuda}. Trying something else")
+        new_device = torch.device("cuda:0")
+        torch.cuda.set_device(new_device)
+        model.cuda()
+        on_cuda = next(model.parameters()).is_cuda
+        if not on_cuda:
+            raise Exception(f"Model is not on cuda. On_cuda is {on_cuda}. We're done")
 
     params_to_update = model.parameters()
     info_message = "Params to learn:"
@@ -183,9 +202,10 @@ def main():
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     # Init hook
-    hook = get_hook()
-    if hook:
-        hook.register_loss(criterion)
+    # hook = get_hook()
+    hook = smd.Hook.create_from_json_file()
+    hook.register_hook(model)
+    hook.register_loss(criterion)
 
     dataloaders_dict = get_dataloaders(args)
     model = train_model(
