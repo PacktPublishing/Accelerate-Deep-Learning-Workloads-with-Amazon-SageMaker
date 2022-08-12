@@ -1,0 +1,4 @@
+torchvision
+attrdict
+nvidia-pyindex
+tritonclient[all]
