@@ -9,7 +9,7 @@ JSON_CONTENT_TYPE = "application/json"
 NLP_TASK = os.getenv("NLP_TASK", "question-answering")
 TASK_MODEL_MAPPING = {
     "question-answering": "distilbert-base-uncased-distilled-squad",
-    "summarization": "bart-large-cnn",
+    "summarization": "distilbart-cnn-6-6",
 }
 
 
