@@ -7,11 +7,13 @@ torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 MODEL_NAME = "resnet50"
 MODEL_VERSION = "1"
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 # load model
 model = (
     torch.hub.load("pytorch/vision:v0.10.0", MODEL_NAME, pretrained=True)
     .eval()
-    .to("cuda")
+    .to(device)
 )
 
 # Compile with Torch TensorRT;
