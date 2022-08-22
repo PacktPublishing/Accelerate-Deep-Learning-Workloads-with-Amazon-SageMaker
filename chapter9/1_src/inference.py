@@ -51,32 +51,6 @@ def preprocess_image(image):
 
 
 def _predict_using_grpc(context, instance):
-    request = predict_pb2.PredictRequest()
-    request.model_spec.name = "model"
-    request.model_spec.signature_name = "serving_default"
-
-    request.inputs["input_1"].CopyFrom(make_tensor_proto(instance))
-    options = [
-        ("grpc.max_send_message_length", MAX_GRPC_MESSAGE_LENGTH),
-        ("grpc.max_receive_message_length", MAX_GRPC_MESSAGE_LENGTH),
-    ]
-    channel = grpc.insecure_channel(f"0.0.0.0:{context.grpc_port}", options=options)
-    stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
-    result_future = stub.Predict.future(request, 30)  # 5 seconds
-
-    output_tensor_proto = result_future.result().outputs["predictions"]
-
-    output_shape = [dim.size for dim in output_tensor_proto.tensor_shape.dim]
-
-    print(f"output shape: {output_shape}")
-    print(f"output_tensor_proto.float_val {output_tensor_proto.float_val}")
-
-    output_np = np.array(output_tensor_proto.float_val).reshape(output_shape)
-    prediction_json = {"predictions": output_np.tolist()}
-    return json.dumps(prediction_json)
-
-
-def _predict_using_grpc_v2(context, instance):
     grpc_request = predict_pb2.PredictRequest()
     grpc_request.model_spec.name = "model"
     grpc_request.model_spec.signature_name = "serving_default"
@@ -89,8 +63,6 @@ def _predict_using_grpc_v2(context, instance):
     channel = grpc.insecure_channel(f"0.0.0.0:{context.grpc_port}", options=options)
     stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
 
-    # TODO: do we need to infer shape like below? can get it by loading to ndarray
-    # grpc_request.inputs['input_1'].CopyFrom(tf.make_tensor_proto(instance, shape=instance.shape))
     grpc_request.inputs["input_1"].CopyFrom(tf.make_tensor_proto(instance))
     result = stub.Predict(grpc_request, 10)
     output_shape = [dim.size for dim in result.outputs["output_1"].tensor_shape.dim]
@@ -112,7 +84,7 @@ def handler(data, context):
         )
 
     if USE_GRPC:
-        prediction = _predict_using_grpc_v2(context, instance)
+        prediction = _predict_using_grpc(context, instance)
     else:
         inst_json = json.dumps({"instances": instance})
         response = requests.post(context.rest_uri, data=inst_json)
