@@ -8,7 +8,6 @@ JSON_CONTENT_TYPE = "application/json"
 
 
 def model_fn(model_dir):
-    print(os.listdir(model_dir))
     tokenizer = DistilBertTokenizer.from_pretrained(model_dir)
     model = DistilBertForSequenceClassification.from_pretrained(model_dir)
     return model, tokenizer

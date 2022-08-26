@@ -7,7 +7,6 @@ JSON_CONTENT_TYPE = "application/json"
 
 
 def model_fn(model_dir):
-    print(os.listdir(model_dir))
     tokenizer = BertTokenizer.from_pretrained(model_dir)
     model = BertForSequenceClassification.from_pretrained(model_dir)
     return model, tokenizer
