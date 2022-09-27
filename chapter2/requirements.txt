@@ -1,0 +1,5 @@
+scikit-learn
+sagemaker==2.109
+opencv-python
+numpy
+matplotlib

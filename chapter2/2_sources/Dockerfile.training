@@ -1,4 +1,4 @@
-FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.9.0-gpu-py38-cu111-ubuntu20.04
+FROM <REPLACE_WITH_YOUR_CONTAINER_URI>
 
 RUN pip3 install git+https://github.com/huggingface/transformers
 

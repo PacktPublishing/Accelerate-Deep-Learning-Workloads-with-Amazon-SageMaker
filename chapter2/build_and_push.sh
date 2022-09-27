@@ -33,14 +33,7 @@ region=$(aws configure get region)
 
 echo "Working in region $region"
 
-if [ "$tag" == "" ]
-then
-    fullname="${account}.dkr.ecr.${region}.amazonaws.com/${image}:latest"
-else
-    fullname="${account}.dkr.ecr.${region}.amazonaws.com/${image}:${tag}"
-fi
-
-# If the repository doesn't exist in ECR, create it.
+fullname="${account}.dkr.ecr.${region}.amazonaws.com/${image}:latest"
 
 aws ecr describe-repositories --repository-names "${image}" > /dev/null 2>&1
 
@@ -50,7 +43,7 @@ then
 fi
 
 # Get the login command from ECR and execute it directly
-$(aws ecr get-login --region ${region} --no-include-email)
+aws ecr get-login-password --region ${region}|docker login --username AWS --password-stdin ${fullname}
 
 # Build the docker image locally with the image name and then push it to ECR
 # with the full name.
