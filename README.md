@@ -1,2 +1,58 @@
-# Accelerate-Deep-Learning-Workloads-with-Amazon-SageMaker
-Accelerate Deep Learning Workloads with Amazon SageMaker
+# Accelerate Deep Learning Workloads with Amazon SageMaker
+
+<a href="<Packtpub book link>?utm_source=github&utm_medium=repository&utm_campaign=<13-P ISBN>"><img src="https://static.packt-cdn.com/products/<13-P ISBN>/cover/smaller" alt="<Book Name>" height="256px" align="right"></a>
+
+This is the code repository for [Accelerate Deep Learning Workloads with Amazon SageMaker](<Packtpub book link>?utm_source=github&utm_medium=repository&utm_campaign=<13-P ISBN>), published by Packt.
+
+**Train, deploy and scale deep learning models effectively using Amazon SageMaker	**
+
+## What is this book about?
+Over the past 10 years, Deep Learning grew from a narrow academic research field to a wide-scale adoption across multiple industries. Deep Learning models demonstrate superior results on benchmark tasks as well as on a wide range of practical tasks, underpinning emerging fields such as Autonomous Driving, Robotics, and Natural Language Understanding.
+
+You will learn about practical aspects of designing, building, and optimizing Deep Learning workloads on Amazon SageMaker. The book also provides end-to-end implementation examples for popular Deep Learning tasks, such as Computer Vision and NLU/NLP. You will begin by exploring key Amazon SageMaker capabilities in the context of Deep Learning. Then you will explore in detail the theoretical and practical aspects of training and hosting your DL models on Amazon SageMaker. You will learn how to train and serve DL models using popular open source frameworks, and understand the hardware and software options you have to optimize your workload. You will then implement several state-of-the-art models for Computer Vision and NLP tasks.
+
+By the end of this book, readers will be fluent in the software and hardware aspects of running Deep Learning workloads using Amazon SageMaker.
+
+This book covers the following exciting features: 
+* Cover key capabilities of Amazon SageMaker relevant for deep learning workloads
+* Design and implement efficient training of DL models
+* Deploy, monitor, and optimize the serving of DL models
+* Gain experience in building, training, and serving DL models
+* Build state-of-the-art NLP and Vision models on SageMaker
+
+If you feel this book is for you, get your [copy](https://www.amazon.com/dp/<10P ISBN>) today!
+
+<a href="https://www.packtpub.com/?utm_source=github&utm_medium=banner&utm_campaign=GitHubBanner"><img src="https://raw.githubusercontent.com/PacktPublishing/GitHub/master/GitHub.png" alt="https://www.packtpub.com/" border="5" /></a>
+
+## Instructions and Navigations
+All of the code is organized into folders.
+
+The code will look like the following:
+```
+<Any code block from the book>
+
+```
+
+**Following is what you need for this book:**
+This book is written for deep learning and AI engineers who have a working knowledge of the Deep Learning domain and who wants to learn and gain practical experience in training and hosting DL models in the AWS cloud using Amazon SageMaker service capabilities.	
+
+With the following software and hardware list you can run all code files present in the book (Chapter <#-#>).
+
+### Software and Hardware List
+
+| Chapter  | Software required                                                                    | OS required                        |
+| -------- | -------------------------------------------------------------------------------------| -----------------------------------|
+|  		   |   							                                            			  | Windows, Mac OS X, and Linux (Any) |
+|          |   																					  |                                    |
+
+We also provide a PDF file that has color images of the screenshots/diagrams used in this book. [Click here to download it](https://packt.link/FXLPc).
+
+
+### Related products <Other books you may enjoy>
+* <Book name #1 from backmatter> [[Packt]](<Book link on Packtpub>) [[Amazon]](https://www.amazon.com/dp/<10P-ISBN>)
+
+* <Book name #2 from backmatter> [[Packt]](<Book link on Packtpub>) [[Amazon]](https://www.amazon.com/dp/<10P-ISBN>)
+
+## Get to Know the Author(s)
+**Vadim Dabravolski**  is a Solutions Architect and Machine Learning Engineer. He has over 15 years of career in software engineering, specifically data engineering and machine learning. During his tenure in AWS, Vadim helped many organizations to migrate their existing ML workloads or engineer new workloads for the Amazon SageMaker platform. Vadim was involved in the development of Amazon SageMaker capabilities and adoption of them in practical scenarios.
+Currently, Vadim works as an ML engineer, focusing on training and deploying large NLP models. The areas of interest include engineering distributed model training and evaluation, complex model deployments use cases, and optimizing inference characteristics of DL models
