@@ -4,7 +4,7 @@
 
 This is the code repository for [Accelerate Deep Learning Workloads with Amazon SageMaker](<Packtpub book link>?utm_source=github&utm_medium=repository&utm_campaign=<13-P ISBN>), published by Packt.
 
-**Train, deploy and scale deep learning models effectively using Amazon SageMaker	**
+**Train, deploy and scale deep learning models effectively using Amazon SageMaker**
 
 ## What is this book about?
 Over the past 10 years, Deep Learning grew from a narrow academic research field to a wide-scale adoption across multiple industries. Deep Learning models demonstrate superior results on benchmark tasks as well as on a wide range of practical tasks, underpinning emerging fields such as Autonomous Driving, Robotics, and Natural Language Understanding.
