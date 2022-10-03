@@ -29,8 +29,15 @@ All of the code is organized into folders.
 
 The code will look like the following:
 ```
-<Any code block from the book>
+estimator.fit({
+"train":"s3://unique/path/train_files/",
+"test":"s3://unique/path/test_files"}
+)
+```
 
+Any command-line input or output is written as follows:
+```
+conda create -n sagemaker python=3.9
 ```
 
 **Following is what you need for this book:**
