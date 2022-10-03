@@ -36,14 +36,18 @@ The code will look like the following:
 **Following is what you need for this book:**
 This book is written for deep learning and AI engineers who have a working knowledge of the Deep Learning domain and who wants to learn and gain practical experience in training and hosting DL models in the AWS cloud using Amazon SageMaker service capabilities.	
 
-With the following software and hardware list you can run all code files present in the book (Chapter <#-#>).
+With the following software and hardware list you can run all code files present in the book (Chapter 1-10).
 
 ### Software and Hardware List
 
 | Chapter  | Software required                                                                    | OS required                        |
 | -------- | -------------------------------------------------------------------------------------| -----------------------------------|
-|  		   |   							                                            			  | Windows, Mac OS X, and Linux (Any) |
-|          |   																					  |                                    |
+|  		1-10   |   				An AWS account			                                            			  | Windows, Mac OS X, and Linux (Any) |
+|  1-10        |   					Python 3 and the SageMaker SDK																        |                                    |
+|  1-10        |   				Conda																                                      |                                    |
+|  1-10        |   				Docker                                                                    |                                    |
+|  1-10        |   				SageMaker Notebook, SageMaker Studio Notebook,or local SageMaker-compatible environment established  |                    |
+|  1-10        |   				Docker                                                                    |                                    |
 
 We also provide a PDF file that has color images of the screenshots/diagrams used in this book. [Click here to download it](https://packt.link/FXLPc).
 
