@@ -43,19 +43,19 @@ With the following software and hardware list you can run all code files present
 | Chapter  | Software required                                                                    | OS required                        |
 | -------- | -------------------------------------------------------------------------------------| -----------------------------------|
 |  		1-10   |   				An AWS account			                                            			  | Windows, Mac OS X, and Linux (Any) |
-|  1-10        |   					Python 3 and the SageMaker SDK																        |                                    |
-|  1-10        |   				Conda																                                      |                                    |
-|  1-10        |   				Docker                                                                    |                                    |
-|  1-10        |   				SageMaker Notebook, SageMaker Studio Notebook,or local SageMaker-compatible environment established  |                    |
-|  1-10        |   				Docker                                                                    |                                    |
+|  1-10        |   					Python 3 and the SageMaker SDK																        |  Windows, Mac OS X, and Linux (Any)|
+|  1-10        |   				Conda																                                    |    Windows, Mac OS X, and Linux (Any)|
+|  1-10        |   				Docker                                                                    |  Windows, Mac OS X, and Linux (Any)|
+|  1-10        |  SageMaker Notebook, SageMaker Studio Notebook,or local SageMaker-compatible environment established  |Windows, Mac OS X, and Linux (Any)|
+|  1-10        |   				Docker                                                                    |      Windows, Mac OS X, and Linux (Any)|                   
 
 We also provide a PDF file that has color images of the screenshots/diagrams used in this book. [Click here to download it](https://packt.link/FXLPc).
 
 
 ### Related products <Other books you may enjoy>
-* <Book name #1 from backmatter> [[Packt]](<Book link on Packtpub>) [[Amazon]](https://www.amazon.com/dp/<10P-ISBN>)
+* Learn Amazon SageMaker - Second Edition [[Packt]](https://www.packtpub.com/product/learn-amazon-sagemaker/9781801817950?_ga=2.179427490.76977997.1664775610-1347501151.1654864057) [[Amazon]](https://www.amazon.com/dp/1801817952)
 
-* <Book name #2 from backmatter> [[Packt]](<Book link on Packtpub>) [[Amazon]](https://www.amazon.com/dp/<10P-ISBN>)
+* Amazon SageMaker Best Practices [[Packt]](https://www.packtpub.com/product/amazon-sagemaker-best-practices/9781801070522?_ga=2.182828192.76977997.1664775610-1347501151.1654864057) [[Amazon]](https://www.amazon.com/dp/1801070520)
 
 ## Get to Know the Author(s)
 **Vadim Dabravolski**  is a Solutions Architect and Machine Learning Engineer. He has over 15 years of career in software engineering, specifically data engineering and machine learning. During his tenure in AWS, Vadim helped many organizations to migrate their existing ML workloads or engineer new workloads for the Amazon SageMaker platform. Vadim was involved in the development of Amazon SageMaker capabilities and adoption of them in practical scenarios.
