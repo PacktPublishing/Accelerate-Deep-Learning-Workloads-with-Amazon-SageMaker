@@ -30,9 +30,9 @@ All of the code is organized into folders.
 The code will look like the following:
 ```
 estimator.fit({
-"train":"s3://unique/path/train_files/",
-"test":"s3://unique/path/test_files"}
-)
+  "train":"s3://unique/path/train_files/",
+  "test":"s3://unique/path/test_files"
+})
 ```
 
 Any command-line input or output is written as follows:
