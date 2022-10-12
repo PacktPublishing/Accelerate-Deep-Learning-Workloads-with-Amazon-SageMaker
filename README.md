@@ -35,11 +35,6 @@ estimator.fit({
 })
 ```
 
-Any command-line input or output is written as follows:
-```
-conda create -n sagemaker python=3.9
-```
-
 **Following is what you need for this book:**
 This book is written for deep learning and AI engineers who have a working knowledge of the Deep Learning domain and who wants to learn and gain practical experience in training and hosting DL models in the AWS cloud using Amazon SageMaker service capabilities.	
 
