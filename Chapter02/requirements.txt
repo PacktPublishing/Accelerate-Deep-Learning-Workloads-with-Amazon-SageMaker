@@ -1,5 +1,5 @@
 scikit-learn
-sagemaker==2.109
+sagemaker==2.113.0
 opencv-python
 numpy
 matplotlib
