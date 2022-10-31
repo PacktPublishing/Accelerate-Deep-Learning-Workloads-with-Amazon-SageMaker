@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import json
 import logging
@@ -9,7 +7,7 @@ import re
 import keras
 import tensorflow as tf
 from keras import backend as K
-from keras.callbacks import ModelCheckpoint, TensorBoard
+from keras.callbacks import ModelCheckpoint
 from keras.layers import (
     Activation,
     BatchNormalization,
@@ -38,7 +36,8 @@ INPUT_TENSOR_NAME = (
 
 
 def keras_model_fn(
-    learning_rate, weight_decay,
+    learning_rate,
+    weight_decay,
 ):
     """keras_model_fn receives hyperparameters from the training job and returns a compiled keras model.
     The model is transformed into a TensorFlow Estimator before training and saved in a
@@ -101,7 +100,7 @@ def eval_input_fn():
 
 
 def _input(epochs, batch_size, channel, channel_name):
-    """Uses the tf.data input pipeline for CIFAR-10 dataset."""
+    """Uses the tf.data input pipeline for CIFAR-100 dataset."""
     mode = args.data_config[channel_name]["TrainingInputMode"]
     logging.info("Running {} in {} mode".format(channel_name, mode))
     dataset = PipeModeDataset(channel=channel_name, record_format="TFRecord")
@@ -142,7 +141,7 @@ def _train_preprocess_fn(image):
 
 
 def _dataset_parser(value):
-    """Parse a CIFAR-10 record from value."""
+    """Parse a CIFAR-100 record from value."""
     featdef = {
         "image": tf.FixedLenFeature([], tf.string),
         "label": tf.FixedLenFeature([], tf.int64),
@@ -154,7 +153,8 @@ def _dataset_parser(value):
 
     # Reshape from [depth * height * width] to [depth, height, width].
     image = tf.cast(
-        tf.transpose(tf.reshape(image, [DEPTH, HEIGHT, WIDTH]), [1, 2, 0]), tf.float32,
+        tf.transpose(tf.reshape(image, [DEPTH, HEIGHT, WIDTH]), [1, 2, 0]),
+        tf.float32,
     )
     label = tf.cast(example["label"], tf.int32)
     image = _train_preprocess_fn(image)
@@ -183,13 +183,11 @@ def main(args):
     logging.info("getting data")
     train_dataset = train_input_fn()
     eval_dataset = eval_input_fn()
-    # validation_dataset = validation_input_fn()
 
     logging.info("configuring model")
     model = keras_model_fn(
         args.learning_rate,
         args.weight_decay,
-        # args.optimizer, args.momentum, mpi, hvd # TODO: remove this
     )
 
     callbacks = []
@@ -226,21 +224,21 @@ if __name__ == "__main__":
         type=str,
         required=False,
         default=os.environ.get("SM_CHANNEL_TRAIN"),
-        help="The directory where the CIFAR-10 input data is stored.",
+        help="The directory where the CIFAR-100 input data is stored.",
     )
     parser.add_argument(
         "--validation",
         type=str,
         required=False,
         default=os.environ.get("SM_CHANNEL_VALIDATION"),
-        help="The directory where the CIFAR-10 input data is stored.",
+        help="The directory where the CIFAR-100 input data is stored.",
     )
     parser.add_argument(
         "--eval",
         type=str,
         required=False,
         default=os.environ.get("SM_CHANNEL_EVAL"),
-        help="The directory where the CIFAR-10 input data is stored.",
+        help="The directory where the CIFAR-100 input data is stored.",
     )
     parser.add_argument(
         "--model_dir",

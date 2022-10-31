@@ -17,12 +17,11 @@ import os
 import shutil
 import sys
 import tarfile
-import wget  # TODO: need to make sure it's installed in container
+import wget
 import os
 
 import tensorflow as tf
 from six.moves import cPickle as pickle
-from six.moves import xrange
 
 CIFAR_FILENAME = "cifar-100-python.tar.gz"
 CIFAR_DOWNLOAD_URL = "https://www.cs.toronto.edu/~kriz/" + CIFAR_FILENAME
@@ -31,6 +30,7 @@ CIFAR_LOCAL_FOLDER = "cifar-100-python"
 
 def download_and_extract(data_dir):
     wget.download(CIFAR_DOWNLOAD_URL, out=CIFAR_FILENAME)
+    print(data_dir)
     os.makedirs(data_dir, exist_ok=True)
     tarfile.open(CIFAR_FILENAME, "r:gz").extractall(data_dir)
 
@@ -43,7 +43,6 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-# TODO: clean this up
 def _get_file_names_cifar100():
     """Returns the file names expected to exist in the input_dir."""
     return {
