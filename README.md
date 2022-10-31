@@ -62,7 +62,3 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 ## Get to Know the Author(s)
 **Vadim Dabravolski**  is a Solutions Architect and Machine Learning Engineer. He has over 15 years of career in software engineering, specifically data engineering and machine learning. During his tenure in AWS, Vadim helped many organizations to migrate their existing ML workloads or engineer new workloads for the Amazon SageMaker platform. Vadim was involved in the development of Amazon SageMaker capabilities and adoption of them in practical scenarios.
 Currently, Vadim works as an ML engineer, focusing on training and deploying large NLP models. The areas of interest include engineering distributed model training and evaluation, complex model deployments use cases, and optimizing inference characteristics of DL models
-### Download a free PDF
-
- <i>If you have already purchased a print or Kindle version of this book, you can get a DRM-free PDF version at no cost.<br>Simply click on the link to claim your free PDF.</i>
-<p align="center"> <a href="https://packt.link/free-ebook/9781801816441">https://packt.link/free-ebook/9781801816441 </a> </p>
