@@ -1,14 +1,12 @@
-import multiprocessing
-import os
-import random
-import tensorflow as tf
-import json
-import tensorflow_datasets as tfds
 import argparse
-from mnist_setup import build_and_compile_cnn_model, mnist_dataset
-import socket
-from retrying import retry
+import json
 import logging
+import os
+import socket
+
+import tensorflow as tf
+from mnist_setup import build_and_compile_cnn_model, mnist_dataset
+from retrying import retry
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
@@ -79,7 +77,6 @@ def main(args):
 
     _set_nccl_environment()
     _build_tf_config()
-    print(os.environ)
 
     strategy = tf.distribute.MultiWorkerMirroredStrategy(
         communication_options=tf.distribute.experimental.CommunicationOptions(

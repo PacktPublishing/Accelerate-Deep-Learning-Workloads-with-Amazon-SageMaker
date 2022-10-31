@@ -1,13 +1,7 @@
-import multiprocessing
 import os
-import random
 import tensorflow as tf
-import json
-import tensorflow_datasets as tfds
 import argparse
 from mnist_setup import build_and_compile_cnn_model, mnist_dataset
-import socket
-from retrying import retry
 import horovod.keras as hvd
 from keras import backend as K
 
