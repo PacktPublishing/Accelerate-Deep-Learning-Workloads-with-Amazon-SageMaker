@@ -1,8 +1,8 @@
 # Accelerate Deep Learning Workloads with Amazon SageMaker
 
-<a href="<Packtpub book link>?utm_source=github&utm_medium=repository&utm_campaign=<13-P ISBN>"><img src="https://static.packt-cdn.com/products/<13-P ISBN>/cover/smaller" alt="<Book Name>" height="256px" align="right"></a>
+<a href="https://www.packtpub.com/product/accelerate-deep-learning-workloads-with-amazon-sagemaker/9781801816441?_ga=2.215362839.1206990960.1667214783-1347501151.1654864057"><img src="https://static.packt-cdn.com/products/9781801816441/cover/smaller" alt="Accelerate Deep Learning Workloads with Amazon SageMaker" height="256px" align="right"></a>
 
-This is the code repository for [Accelerate Deep Learning Workloads with Amazon SageMaker](<Packtpub book link>?utm_source=github&utm_medium=repository&utm_campaign=<13-P ISBN>), published by Packt.
+This is the code repository for [Accelerate Deep Learning Workloads with Amazon SageMaker](https://www.packtpub.com/product/accelerate-deep-learning-workloads-with-amazon-sagemaker/9781801816441?_ga=2.215362839.1206990960.1667214783-1347501151.1654864057), published by Packt.
 
 **Train, deploy and scale deep learning models effectively using Amazon SageMaker**
 
@@ -20,7 +20,7 @@ This book covers the following exciting features:
 * Gain experience in building, training, and serving DL models
 * Build state-of-the-art NLP and Vision models on SageMaker
 
-If you feel this book is for you, get your [copy](https://www.amazon.com/dp/<10P ISBN>) today!
+If you feel this book is for you, get your [copy](https://www.amazon.com/dp/1801816441) today!
 
 <a href="https://www.packtpub.com/?utm_source=github&utm_medium=banner&utm_campaign=GitHubBanner"><img src="https://raw.githubusercontent.com/PacktPublishing/GitHub/master/GitHub.png" alt="https://www.packtpub.com/" border="5" /></a>
 
