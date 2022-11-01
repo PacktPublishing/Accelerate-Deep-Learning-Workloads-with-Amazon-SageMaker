@@ -1,22 +1,18 @@
 from __future__ import division, print_function
 
 import argparse
+import logging
 import os
 
+import smdistributed.dataparallel.torch.torch_smddp
 import torch
 import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel as DDP
-import smdistributed.dataparallel.torch.torch_smddp
-import torch.distributed as dist
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, models, transforms
-import logging
-
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
