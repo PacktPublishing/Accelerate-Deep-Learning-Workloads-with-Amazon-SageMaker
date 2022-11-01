@@ -1,23 +1,18 @@
 from __future__ import division, print_function
 
-# Common imports
 import argparse
+import logging
 import os
-import random
-from webbrowser import get
 
-# Third Party imports
 import numpy as np
-import torch.distributed as dist
 import torch
+import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, models, transforms
-import logging
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -65,7 +60,7 @@ def test(model, device, test_loader):
     test_loss = 0
     correct = 0
     with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(test_loader):
+        for _, (data, target) in enumerate(test_loader):
             data, target = data.to(device), target.to(device)
             output = model(data)
             test_loss += F.cross_entropy(output, target, reduction="sum").item()

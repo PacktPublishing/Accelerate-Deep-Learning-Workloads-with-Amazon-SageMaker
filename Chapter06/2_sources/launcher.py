@@ -5,15 +5,12 @@
 # https://github.com/pytorch/pytorch/blob/master/torch/distributed/run.py
 
 
-from argparse import ArgumentParser
-
-
-import sys
-import subprocess
-import os
-from argparse import ArgumentParser, REMAINDER
-import logging
 import json
+import logging
+import os
+import subprocess
+import sys
+from argparse import ArgumentParser
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
