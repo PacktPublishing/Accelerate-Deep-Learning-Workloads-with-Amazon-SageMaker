@@ -18,6 +18,8 @@ from torch.cuda.amp import autocast
 from torch.optim.lr_scheduler import StepLR
 from torchnet.dataset import SplitDataset
 from torchvision import datasets, models, transforms
+import time
+import copy
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -28,20 +30,18 @@ NUM_CLASSES = 2  # two classes: ants and bees
 ## The following two lines can be removed if they cause a performance impact.
 ## For more details, see:
 ## https://pytorch.org/docs/stable/notes/randomness.html#cudnn
-# torch.backends.cudnn.deterministic = True
-# torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 
 # SM Distributed: Define smp.step. Return any tensors needed outside.
 @smp.step
-def train_step(model, data, target):
-    # TODO: not using autocase or any AMP
-    # with autocast(1 > 0):
-    #    output = model(data)
+def train_step(model, data, target, criterion):
     output = model(data)
-    # original loss from SM primer
-    #     loss = F.nll_loss(output, target, reduction="mean")
-    loss = F.cross_entropy(output, target, reduction="mean")
+    LOGGER.info(f"outputs from train step: {output}")
+    LOGGER.info(f"target from train step: {target}")
+    loss = criterion(output, target)
+    LOGGER.info(f"loss from train step: {loss}")
 
     # scaled_loss = loss  # TODO: it's not scaling it... need to do something about it
     model.backward(
@@ -50,70 +50,151 @@ def train_step(model, data, target):
     return output, loss
 
 
-def train(model, device, train_loader, optimizer, epoch, global_rank):
-    model.train()  # set model to training mode
-    for batch_idx, (data, target) in enumerate(train_loader):
-        # SM Distributed: Move input tensors to the GPU ID used by the current process,
-        # based on the set_device call.
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        # Return value, loss_mb is a loss for every minibatch
-        _, loss_mb = train_step(model, data, target)
-
-        # SM Distributed: Average the loss across microbatches.
-        loss = loss_mb.reduce_mean()
-
-        optimizer.step()
-
-        if global_rank == 0 and batch_idx % 10 == 0:
-            LOGGER.info(
-                "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
-                    epoch,
-                    batch_idx * len(data),
-                    len(train_loader.dataset),
-                    100.0 * batch_idx / len(train_loader),
-                    loss.item(),
-                )
-            )
-
-
 # SM Distributed: Define smp.step for evaluation.
-@smp.step
-def test_step(model, data, target):
+ @smp.step
+def test_step(model, data, target, criterion):
     output = model(data)
-    loss = F.cross_entropy(output, target, reduction="sum").item()  # sum up batch loss
-    pred = output.argmax(
-        dim=1, keepdim=True
-    )  # get the index of the max log-probability
-    correct = pred.eq(target.view_as(pred)).sum().item()
-    return loss, correct
+    loss = criterion(output, target)  # sum up batch loss
+    return output, loss
 
 
-def test(model, device, test_loader):
-    model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for batch_idx, (data, target) in enumerate(test_loader):
-            # SM Distributed: Moves input tensors to the GPU ID used by the current process
-            # based on the set_device call.
-            data, target = data.to(device), target.to(device)
+def train_model(model, device, dataloaders, criterion, optimizer, num_epochs=25):
+    since = time.time()
 
-            # Since test_step returns scalars instead of tensors,
-            # test_step decorated with smp.step will return lists instead of StepOutput objects.
-            loss_batch, correct_batch = test_step(model, data, target)
-            test_loss += sum(loss_batch)
-            correct += sum(correct_batch)
+    val_acc_history = []
 
-    test_loss /= len(test_loader.dataset)
-    LOGGER.info(
-        "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-            test_loss,
-            correct,
-            len(test_loader.dataset),
-            100.0 * correct / len(test_loader.dataset),
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+
+    for epoch in range(num_epochs):
+        print("Epoch {}/{}".format(epoch, num_epochs - 1))
+        print("-" * 10)
+
+        # Each epoch has a training and validation phase
+        for phase in ["train", "val"]:
+            LOGGER.info(f"============{phase} phase=========")
+            if phase == "train":
+                model.train()  # Set model to training mode
+            else:
+                model.eval()  # Set model to evaluate mode
+
+            running_loss = 0.0
+            running_corrects = 0
+
+            # Iterate over data.
+            for inputs, labels in dataloaders[phase]:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == "train"):
+
+                    # backward + optimize only if in training phase
+                    if phase == "train":
+                        outputs, loss_mb = train_step(model, inputs, labels, criterion)
+                        loss = loss_mb.reduce_mean()
+                        optimizer.step()
+                    else:
+                        outputs, loss_mb = test_step(model, inputs, labels, criterion)
+                        loss = loss_mb.reduce_mean()
+                # LOGGER.info(
+                #    f"Outputs from StepOutput should be grouped along microbatch:{outputs.outputs}"
+                # )
+                # LOGGER.info(f"Concatenated outputs from StepOutput:{outputs.concat()}")
+                _, preds = torch.max(outputs.concat(), 1)
+
+                # statistics
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+
+            epoch_loss = running_loss / len(dataloaders[phase].dataset)
+            epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
+
+            print("{} Loss: {:.4f} Acc: {:.4f}".format(phase, epoch_loss, epoch_acc))
+
+            ## deep copy the model
+            # if phase == "val" and epoch_acc > best_acc:
+            #    best_acc = epoch_acc
+            #    best_model_wts = copy.deepcopy(model.state_dict())
+            if phase == "val":
+                val_acc_history.append(epoch_acc)
+
+    time_elapsed = time.time() - since
+    print(
+        "Training complete in {:.0f}m {:.0f}s".format(
+            time_elapsed // 60, time_elapsed % 60
         )
     )
+    print("Best val Acc: {:4f}".format(best_acc))
+
+    # load best model weights
+    model.load_state_dict(best_model_wts)
+    return model, val_acc_history
+
+
+def set_parameter_requires_grad(model, feature_extracting):
+    if feature_extracting:
+        for param in model.parameters():
+            param.requires_grad = False
+
+
+def initialize_model(model_name, num_classes, feature_extract, use_pretrained=True):
+    # Initialize these variables which will be set in this if statement. Each of these
+    #   variables is model specific.
+    model_ft = None
+    input_size = 0
+
+    if model_name == "resnet":
+        """Resnet18"""
+        model_ft = models.resnet18(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "alexnet":
+        """Alexnet"""
+        model_ft = models.alexnet(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "vgg":
+        """VGG11_bn"""
+        model_ft = models.vgg11_bn(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier[6].in_features
+        model_ft.classifier[6] = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "squeezenet":
+        """Squeezenet"""
+        model_ft = models.squeezenet1_0(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        model_ft.classifier[1] = nn.Conv2d(
+            512, num_classes, kernel_size=(1, 1), stride=(1, 1)
+        )
+        model_ft.num_classes = num_classes
+        input_size = 224
+
+    elif model_name == "densenet":
+        """Densenet"""
+        model_ft = models.densenet121(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.classifier.in_features
+        model_ft.classifier = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    else:
+        print("Invalid model name, exiting...")
+        exit()
+
+    return model_ft, input_size
 
 
 def _cast_dict_from_string(input_dict: dict) -> argparse.Namespace:
@@ -140,15 +221,10 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     # hyperparameters sent by the client are passed as command-line arguments to the script.
+    parser.add_argument("--model-name", type=str, default="squeezenet")
     parser.add_argument("--epochs", type=int, default=15)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument(
-        "--test-batch-size",
-        type=int,
-        default=1000,
-        metavar="N",
-        help="input batch size for testing (default: 1000)",
-    )
+    parser.add_argument("--feature-extract", type=bool, default=True)
     parser.add_argument(
         "--mp_parameters", type=str, default="", help="Dictionary with SDT parameters"
     )
@@ -156,7 +232,6 @@ def parse_args():
 
 
 def get_dataloaders(args, sdmp_args):
-    # Data augmentation and normalization for training
     data_transforms = {
         "train": transforms.Compose(
             [
@@ -176,6 +251,8 @@ def get_dataloaders(args, sdmp_args):
         ),
     }
 
+    print("Initializing Datasets and Dataloaders...")
+
     # Create training and validation datasets
     image_datasets = {
         x: datasets.ImageFolder(
@@ -183,75 +260,38 @@ def get_dataloaders(args, sdmp_args):
         )
         for x in ["train", "val"]
     }
+    # Create training and validation dataloaders
 
-    if sdmp_args.dp_size > 1:
-        partitions_dict = {
-            f"{i}": 1 / sdmp_args.dp_size for i in range(sdmp_args.dp_size)
-        }
-        dataset_train = SplitDataset(
-            image_datasets["train"], partitions=partitions_dict
-        )
-        dataset_train.select(f"{sdmp_args.dp_rank}")
+    dataloaders_dict = {}
+    train_sampler = torch.utils.data.distributed.DistributedSampler(
+        image_datasets["train"], num_replicas=sdmp_args.dp_size, rank=sdmp_args.dp_rank
+    )
 
-    elif (not sdmp_args.ddp) or sdmp_args.dp_size == 1:
-        dataset_train = image_datasets["train"]
-    else:
-        raise Exception("Check your distributed configuration.")
-
-    ##    {"num_workers": 1, "pin_memory": True, "shuffle": False, "drop_last": True}
-    train_loader = torch.utils.data.DataLoader(
-        dataset_train,
+    dataloaders_dict["train"] = torch.utils.data.DataLoader(
+        image_datasets["train"],
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=0,
         pin_memory=True,
+        sampler=train_sampler,
         drop_last=True,
     )
 
-    test_loader = None
-    # Test loader will be available for global rank 0 process
-    if sdmp_args.rank == 0:
-        test_loader = torch.utils.data.DataLoader(
-            image_datasets["val"],
-            batch_size=args.test_batch_size,
-            shuffle=True,
-            drop_last=True,
-        )
-    return train_loader, test_loader
-
-
-def get_resnet_model():
-    # TODO: change model to resnet.
-    # getting error like below on resnet now:
-    #  on line with relu operation
-    #  result = torch.relu_(input)
-    #  ErrorMessage ":RuntimeError: Output 0 of SMPInputBackward is a view and is being modified inplace.
-    #  This view was created inside a custom Function (or because an input was returned as-is) and the autograd
-    #  logic to handle view+inplace would override the custom backward associated with the custom Function,
-    #  leading to incorrect gradients. This behavior is forbidden. You can fix this by cloning the output of the custom Function.
-    # model_ft = models.resnet18(pretrained=True)
-    model_ft = models.squeezenet1_0(pretrained=True)
-    num_ftrs = model_ft.fc.in_features
-    model_ft.fc = nn.Linear(num_ftrs, NUM_CLASSES)
-    input_size = 224  # defined by Resnet18
-
-    return model_ft, input_size
-
-
-def get_squeezenet_model():
-    model_ft = models.squeezenet1_0(pretrained=True)
-    model_ft.classifier[1] = nn.Conv2d(
-        512, NUM_CLASSES, kernel_size=(1, 1), stride=(1, 1)
+    dataloaders_dict["val"] = torch.utils.data.DataLoader(
+        image_datasets["val"],
+        batch_size=args.batch_size,
+        shuffle=True,
+        drop_last=True,
     )
-    model_ft.num_classes = NUM_CLASSES
-    input_size = 224
 
-    return model_ft, input_size
+    return dataloaders_dict
 
 
 def main():
 
     smp.init()
+    torch.cuda.set_device(smp.local_rank())
+    device = torch.device("cuda")
 
     args, unknown_args = parse_args()
     # this is parsing MP parameters passed as string by SageMaker
@@ -282,15 +322,29 @@ def main():
 
     # TODO: change it
     # model, args.input_size = get_resnet_model()
-    model, args.input_size = get_squeezenet_model()
+    model, args.input_size = initialize_model(
+        args.model_name, NUM_CLASSES, args.feature_extract, use_pretrained=True
+    )
 
-    torch.cuda.set_device(smp.local_rank())
-    device = torch.device("cuda")
+    params_to_update = model.parameters()
+    print("Params to learn:")
+    if args.feature_extract:
+        params_to_update = []
+        for name, param in model.named_parameters():
+            if param.requires_grad == True:
+                params_to_update.append(param)
+                print("\t", name)
+    else:
+        for name, param in model.named_parameters():
+            if param.requires_grad == True:
+                print("\t", name)
 
-    optimizer = optim.Adadelta(model.parameters(), lr=4.0)
+    # Observe that all parameters are being optimized
+    optimizer = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
+    criterion = nn.CrossEntropyLoss()
+
     model = smp.DistributedModel(model)
     optimizer = smp.DistributedOptimizer(optimizer)
-    scheduler = StepLR(optimizer, step_size=1, gamma=0.7)
 
     # Scaling batch size if data parallelism used
     if sdmp_args.dp_size > 1:
@@ -298,28 +352,28 @@ def main():
         args.batch_size //= sdmp_args.dp_size
         args.batch_size = max(args.batch_size, 1)
         LOGGER.info(f"Scaled batch size from {old_batch_size} to {args.batch_size}.")
-    train_loader, test_loader = get_dataloaders(args, sdmp_args)
+    dataloaders_dict = get_dataloaders(args, sdmp_args)
 
-    for epoch in range(args.epochs):
-        # train(model, scaler, device, train_loader, optimizer, epoch) # TODO: clean this
-        train(model, device, train_loader, optimizer, epoch, sdmp_args.rank)
-        scheduler.step()
-
-    if sdmp_args.rank == 0:
-        test(model, device, test_loader)
-
+    model, hist = train_model(
+        model,
+        device,
+        dataloaders_dict,
+        criterion,
+        optimizer,
+        num_epochs=args.epochs,
+    )
     # Waiting the save checkpoint to be finished before run another allgather_object
     smp.barrier()
 
-    if sdmp_args.rank == 0:
-        model_dict = model.local_state_dict()
-        opt_dict = optimizer.local_state_dict()
-        smp.save(
-            {"model_state_dict": model_dict, "optimizer_state_dict": opt_dict},
-            os.path.join(os.getenv("SM_MODEL_DIR"), "model_checkpoint.pt"),
-            partial=True,
-        )
-    smp.barrier()
+    # if sdmp_args.rank == 0:
+    #    model_dict = model.local_state_dict()
+    #    opt_dict = optimizer.local_state_dict()
+    #    smp.save(
+    #        {"model_state_dict": model_dict, "optimizer_state_dict": opt_dict},
+    #        os.path.join(os.getenv("SM_MODEL_DIR"), "model_checkpoint.pt"),
+    #        partial=True,
+    #    )
+    # smp.barrier()
 
     # if smp.local_rank() == 0:
     #    print("Start syncing")
