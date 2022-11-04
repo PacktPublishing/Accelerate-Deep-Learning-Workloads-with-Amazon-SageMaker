@@ -1,0 +1,11 @@
+tensorflow
+tensorflow-io
+tensorboard-plugin-profile
+torch_tb_profiler
+smedebug
+
+# TODO: not needed???
+bokeh
+typing_extensions
+pytz
+matplotlib

@@ -1,28 +1,15 @@
-# Tutorials: https://github.com/pytorch/tutorials/blob/master/intermediate_source/tensorboard_profiler_tutorial.py & https://pytorch.org/tutorials/intermediate/tensorboard_profiler_tutorial.html
-# https://pytorch.org/docs/stable/tensorboard.html
-
-from __future__ import division, print_function
-
 import argparse
-import ast
-import os
-import random
 import logging
+import os
+import time
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-from torch.cuda.amp import autocast
-from torch.optim.lr_scheduler import StepLR
-from torchnet.dataset import SplitDataset
-from torchvision import datasets, models, transforms
-from torch.optim import lr_scheduler
-import time
-import copy
-from torch.utils.tensorboard import SummaryWriter
 import torch.profiler
+from torch.optim import lr_scheduler
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import datasets, models, transforms
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -61,10 +48,6 @@ def train_model(
                 profile_memory=True,
                 with_stack=True,
             ) as prof:
-                # TODO: this is a limit to reduce overhead on profiler - removing for now
-                # if step >= (1 + 1 + 3) * 2:
-                #    break
-                # Log loss and accuracy
 
                 for _, (inputs, labels) in enumerate(dataloaders[phase]):
                     inputs, labels = inputs.to(device), labels.to(device)
@@ -93,6 +76,13 @@ def train_model(
             epoch_loss = running_loss / (args.batch_size * step_counter)
             tb_writer.add_scalar(f"Loss/{phase}", epoch_loss, epoch)
             tb_writer.add_scalar(f"Accuracy/{phase}", epoch_accuracy, epoch)
+            tb_writer.add_histogram("conv1.weight", model.conv1.weight, epoch)
+            tb_writer.add_histogram("conv1.weight_grad", model.conv1.weight.grad, epoch)
+            tb_writer.add_histogram("fc.weight", model.fc.weight, epoch)
+            tb_writer.add_histogram("fc.weight_grad", model.fc.weight.grad, epoch)
+            tb_writer.add_scalar(f"Loss/{phase}", epoch_loss, epoch)
+            tb_writer.add_scalar(f"Accuracy/{phase}", epoch_accuracy, epoch)
+            tb_writer.add_hparams(hparam_dict=vars(args), metric_dict={epoch_accuracy})
 
             print(
                 f"Epoch {epoch}: {phase} loss {epoch_loss}, accuracy {epoch_accuracy},  in {epoch_time} sec. Total number of steps: {step_counter}"

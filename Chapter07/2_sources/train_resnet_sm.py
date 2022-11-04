@@ -1,20 +1,15 @@
-# Example: https://github.com/aws/amazon-sagemaker-examples/blob/main/sagemaker-debugger/pytorch_profiling/entry_point/pt_res50_cifar10_distributed.py
-
-from __future__ import division, print_function
 import argparse
-import os
 import logging
+import os
+import time
+
+import smdebug.pytorch as smd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, models, transforms
-import time
-from torch.optim import lr_scheduler
 from smdebug import modes
-
-# from smdebug.pytorch import get_hook
-import smdebug.pytorch as smd
-
+from torch.optim import lr_scheduler
+from torchvision import datasets, models, transforms
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -166,12 +161,8 @@ def main():
         NUM_CLASSES, feature_extract=False, use_pretrained=True
     )
 
-    # torch.cuda.set_device(0)
     device = torch.device("cuda")
     model.to(device)
-
-    # TODO: remove it
-    print(os.environ)
 
     on_cuda = next(model.parameters()).is_cuda
     if not on_cuda:
@@ -201,8 +192,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    # Init hook
-    # hook = get_hook()
+    # Initialize Hook object
     hook = smd.Hook.create_from_json_file()
     hook.register_hook(model)
     hook.register_loss(criterion)
