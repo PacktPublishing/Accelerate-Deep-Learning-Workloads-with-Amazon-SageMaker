@@ -1,8 +1,15 @@
 # This is adoption of TensorRT notebook: https://pytorch.org/TensorRT/_notebooks/Resnet50-example.html
 
 
+import json
+import time
+
+import numpy as np
 import torch
-import torchvision
+import torch.backends.cudnn as cudnn
+import torch_tensorrt
+from PIL import Image
+from torchvision import transforms
 
 torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 
@@ -12,10 +19,6 @@ resnet50_model.eval()
 print("Resnet50 backbone")
 print(resnet50_model)
 
-
-from PIL import Image
-from torchvision import transforms
-import json
 
 for i in range(4):
     img_path = "./data/img%d.JPG" % i
@@ -34,10 +37,6 @@ for i in range(4):
 with open("./data/imagenet_class_index.json") as json_file:
     d = json.load(json_file)
 
-
-import numpy as np
-import time
-import torch.backends.cudnn as cudnn
 
 cudnn.benchmark = True
 
@@ -117,8 +116,6 @@ model = resnet50_model.eval().to("cuda")
 print("Model benchmark without Torch-TensorRT")
 benchmark(model, input_shape=(128, 3, 224, 224), nruns=100)
 
-
-import torch_tensorrt
 
 # The compiled module will have precision as specified by "op_precision".
 # Here, it will have FP32 precision.
