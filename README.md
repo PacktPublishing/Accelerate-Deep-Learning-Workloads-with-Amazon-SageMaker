@@ -59,6 +59,6 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 
 * Amazon SageMaker Best Practices [[Packt]](https://www.packtpub.com/product/amazon-sagemaker-best-practices/9781801070522?_ga=2.182828192.76977997.1664775610-1347501151.1654864057) [[Amazon]](https://www.amazon.com/dp/1801070520)
 
-## Get to Know the Author(s)
+## Get to Know the Author
 **Vadim Dabravolski**  is a Solutions Architect and Machine Learning Engineer. He has over 15 years of career in software engineering, specifically data engineering and machine learning. During his tenure in AWS, Vadim helped many organizations to migrate their existing ML workloads or engineer new workloads for the Amazon SageMaker platform. Vadim was involved in the development of Amazon SageMaker capabilities and adoption of them in practical scenarios.
 Currently, Vadim works as an ML engineer, focusing on training and deploying large NLP models. The areas of interest include engineering distributed model training and evaluation, complex model deployments use cases, and optimizing inference characteristics of DL models
