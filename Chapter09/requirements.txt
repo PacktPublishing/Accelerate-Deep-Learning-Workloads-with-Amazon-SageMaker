@@ -1,0 +1,5 @@
+numpy
+Pillow
+tensorflow
+tensorflow-hub
+requests

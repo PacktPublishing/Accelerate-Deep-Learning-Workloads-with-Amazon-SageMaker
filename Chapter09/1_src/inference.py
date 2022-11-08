@@ -1,22 +1,15 @@
-from PIL import Image
-import io
-import base64
 import json
-
-import numpy as np
-import tensorflow as tf
-from io import BytesIO
 import os
-
-import requests
 import sys
 
 # Imports for GRPC invoke on TFS
 import grpc
+import numpy as np
+import requests
+import tensorflow as tf
+from PIL import Image
 from tensorflow.compat.v1 import make_tensor_proto
-from tensorflow_serving.apis import predict_pb2
-from tensorflow_serving.apis import prediction_service_pb2_grpc
-
+from tensorflow_serving.apis import predict_pb2, prediction_service_pb2_grpc
 
 HEIGHT = os.getenv("IMAGE_HEIGHT", 224)
 WIDTH = os.getenv("IMAGE_WIDTH", 224)
