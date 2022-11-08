@@ -1,8 +1,7 @@
-import torch
-import os
 import json
-from transformers import pipeline
+import os
 
+from transformers import pipeline
 
 JSON_CONTENT_TYPE = "application/json"
 
