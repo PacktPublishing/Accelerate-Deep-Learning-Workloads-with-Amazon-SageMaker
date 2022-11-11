@@ -1,6 +1,7 @@
+import os
+
 import torch
 import torch_tensorrt
-import os
 
 torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
 
@@ -20,7 +21,7 @@ model = (
 trt_model = torch_tensorrt.compile(
     model,
     inputs=[torch_tensorrt.Input((1, 3, 224, 224))],
-    enabled_precisions={torch.half},  # Run with FP32
+    enabled_precisions={torch.float32},
 )
 
 # Save the model
