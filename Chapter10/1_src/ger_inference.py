@@ -1,7 +1,7 @@
-import torch
-import os
 import json
-from transformers import BertTokenizer, BertForSequenceClassification
+
+import torch
+from transformers import BertForSequenceClassification, BertTokenizer
 
 JSON_CONTENT_TYPE = "application/json"
 

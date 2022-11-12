@@ -1,8 +1,8 @@
-import torch
-import os
 import json
-from transformers import pipeline
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
+
+import torch
+from transformers import (DistilBertForSequenceClassification,
+                          DistilBertTokenizer)
 
 JSON_CONTENT_TYPE = "application/json"
 
