@@ -1,3 +1,15 @@
+
+### Get this product for $5
+
+<i>Packt is having its biggest sale of the year. Get this eBook or any other book, video, or course that you like just for $5 each</i>
+
+
+<b><p align='center'>[Buy now](https://packt.link/9781801816441)</p></b>
+
+
+<b><p align='center'>[Buy similar titles for just $5](https://subscription.packtpub.com/search)</p></b>
+
+
 # Accelerate Deep Learning Workloads with Amazon SageMaker
 
 <a href="https://www.packtpub.com/product/accelerate-deep-learning-workloads-with-amazon-sagemaker/9781801816441?_ga=2.215362839.1206990960.1667214783-1347501151.1654864057"><img src="https://static.packt-cdn.com/products/9781801816441/cover/smaller" alt="Accelerate Deep Learning Workloads with Amazon SageMaker" height="256px" align="right"></a>
